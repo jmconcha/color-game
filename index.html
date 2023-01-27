@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Color Game</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        border: none;
+        box-sizing: border-box;
+      }
+
+      #palette {
+        width: 100vw;
+        display: grid;
+        grid-template-columns: repeat(10, auto);
+        justify-content: center;
+        gap: 20px;
+      }
+
+      .box {
+        width: 100px;
+        aspect-ratio: 1;
+        margin-top: 20px;
+        font-size: 16px;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 50%;
+        color: #fff;
+        font-weight: bold;
+        border: 5px solid transparent;
+      }
+    </style>
+    <script>
+      window.addEventListener('DOMContentLoaded', function () {
+        const box = document.getElementById('box1');
+        const box2 = document.getElementById('box2');
+        const maxBoxesCount = 30;
+
+        generateBoxes();
+        initializeBoxes();
+
+        // test
+        const testBox = document.getElementById('test-box');
+        // set random background color
+        testBox.style.setProperty('background-color', getRandomRgbColor());
+        // add event listeners: dragstart, dragend, dragover, and drop
+        testBox.addEventListener('dragstart', dragstartHandler);
+        testBox.addEventListener('dragend', dragendHandler);
+        testBox.addEventListener('dragover', dragoverHandler);
+        testBox.addEventListener('drop', dropHandler);
+        // test
+
+        function initializeBoxes() {
+          for (let i = 0; i < maxBoxesCount; i++) {
+            const box = document.getElementById(`box${i}`);
+            // set random background color
+            box.style.setProperty('background-color', getRandomRgbColor());
+            // add event listeners: dragstart, dragend, dragover, and drop
+            box.addEventListener('dragstart', dragstartHandler);
+            box.addEventListener('dragend', dragendHandler);
+            box.addEventListener('dragover', dragoverHandler);
+            box.addEventListener('drop', dropHandler);
+          }
+        }
+
+        function generateBoxes() {
+          const palette = document.getElementById('palette');
+          const boxes = [];
+
+          for (let i = 0; i < maxBoxesCount; i++) {
+            const box = document.createElement('div');
+            box.id = `box${i}`;
+            box.className = 'box';
+            box.draggable = true;
+            palette.append(box);
+          }
+        }
+
+        function dragstartHandler(ev) {
+          console.log('dragstart', ev);
+          ev.dataTransfer.setData('text/plain', ev.target.id);
+          ev.dataTransfer.dropEffect = 'move';
+        }
+
+        function dragendHandler(ev) {
+          console.log('dragend', ev);
+          ev.dataTransfer.clearData();
+        }
+
+        function dragoverHandler(ev) {
+          ev.preventDefault();
+          console.log('dragover', ev);
+          ev.dataTransfer.dropEffect = 'move';
+        }
+
+        function dropHandler(ev) {
+          ev.preventDefault();
+          console.log('drop', ev);
+          const id = ev.dataTransfer.getData('text/plain');
+          console.log('id', id);
+
+          const draggedElement = document.getElementById(id);
+          const dropAreaElement = ev.target;
+          const draggedElementStyles = getComputedStyle(draggedElement);
+          const dropAreaElementStyles = getComputedStyle(dropAreaElement);
+          const mixedColors = mixColors(
+            draggedElementStyles['background-color'],
+            dropAreaElementStyles['background-color']
+          );
+          dropAreaElement.style.setProperty(
+            'background-color',
+            `rgb(${mixedColors[0]}, ${mixedColors[1]}, ${mixedColors[2]})`
+          );
+
+          console.log(
+            'mixed colors',
+            mixColors(
+              draggedElementStyles['background-color'],
+              dropAreaElementStyles['background-color']
+            )
+          );
+        }
+
+        function mixColors(colorA, colorB) {
+          console.log('colorA', colorA);
+          console.log('colorB', colorB);
+          let colorAValues = colorA
+            .replace(/[a-z()]/gi, '')
+            .split(',')
+            .map((colorValue) => parseInt(colorValue));
+          let colorBValues = colorB
+            .replace(/[a-z()]/gi, '')
+            .split(',')
+            .map((colorValue) => parseInt(colorValue));
+          const rgbValues = [];
+
+          // mix colors
+          rgbValues[0] = Math.min(255, colorAValues[0] + colorBValues[0]);
+          rgbValues[1] = Math.min(255, colorAValues[1] + colorBValues[1]);
+          rgbValues[2] = Math.min(255, colorAValues[2] + colorBValues[2]);
+
+          return rgbValues;
+        }
+      });
+
+      function getRandomRgbColor() {
+        return `rgb(${getRandInt(0, 255)}, ${getRandInt(0, 255)}, ${getRandInt(
+          0,
+          255
+        )})`;
+      }
+
+      function getRandInt(min, max) {
+        return Math.floor(Math.random() * max) + min;
+      }
+    </script>
+  </head>
+  <body>
+    <div id="palette"></div>
+  </body>
+</html>
